@@ -1,0 +1,73 @@
+# Redirect all HTTP to HTTPS
+server {
+    listen 80;
+    server_name app.${DOMAIN} admin.${DOMAIN} widget.${DOMAIN};
+
+    # Let's Encrypt challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# Dashboard
+server {
+    listen 443 ssl;
+    server_name app.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/app.${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.${DOMAIN}/privkey.pem;
+
+    location / {
+        proxy_pass http://frontend-dashboard:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # SSE support
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+    }
+}
+
+# Admin panel
+server {
+    listen 443 ssl;
+    server_name admin.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/admin.${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/admin.${DOMAIN}/privkey.pem;
+
+    location / {
+        proxy_pass http://frontend-admin:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+    }
+}
+
+# Widget
+server {
+    listen 443 ssl;
+    server_name widget.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/widget.${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/widget.${DOMAIN}/privkey.pem;
+
+    location / {
+        proxy_pass http://frontend-widget:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        add_header Access-Control-Allow-Origin *;
+    }
+}
