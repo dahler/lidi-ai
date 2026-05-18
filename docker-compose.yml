@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # ── Database ────────────────────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: lidi-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lidi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: lidi-redis
+    ports:
+      - "6379:6379"
+
+  # ── FastAPI Backend ──────────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: lidi-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/lidi
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production}
+      JWT_REFRESH_EXPIRATION_DAYS: 30
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      MICROSOFT_TENANT_ID: ${MICROSOFT_TENANT_ID:-common}
+      MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:-http://localhost:8000/api/auth/callback}
+      # LLM provider
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      # DeepSeek — used when AI_PROVIDER=deepseek
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      # Embedding provider
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
+      # OpenAI embeddings — used when EMBEDDING_PROVIDER=openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      # Ollama — used when AI_PROVIDER=ollama or EMBEDDING_PROVIDER=ollama
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_TEXT_MODEL: ${OLLAMA_TEXT_MODEL:-gemma3:4b}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      RAG_EMBEDDING_DIM: ${RAG_EMBEDDING_DIM:-768}
+      CORS_ORIGINS: '["http://localhost:3001","http://localhost:3002","http://localhost:3003","http://app.localhost","http://widget.localhost","http://admin.localhost"]'
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - uploads_data:/app/uploads
+
+  # ── Customer Dashboard ───────────────────────────────────────────────
+  frontend-dashboard:
+    build:
+      context: ./frontend-dashboard
+      args:
+        VITE_API_URL: ""
+        VITE_WIDGET_URL: "http://localhost:3002"
+    container_name: lidi-dashboard
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+  # ── Embeddable Widget ────────────────────────────────────────────────
+  frontend-widget:
+    build:
+      context: ./frontend-widget
+      args:
+        VITE_API_URL: "http://localhost:8000"
+    container_name: lidi-widget
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+
+  # ── Admin Panel ──────────────────────────────────────────────────────
+  frontend-admin:
+    build:
+      context: ./frontend-admin
+      args:
+        VITE_API_URL: ""
+    container_name: lidi-admin
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  uploads_data:

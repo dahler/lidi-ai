@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Widget Test Page</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* ── Fake navbar ─────────────────────────────── */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav .logo { font-weight: 700; font-size: 1.1rem; color: #6366f1; }
+    nav .links { display: flex; gap: 1.5rem; }
+    nav .links a {
+      text-decoration: none;
+      color: #64748b;
+      font-size: 0.9rem;
+      transition: color .15s;
+    }
+    nav .links a:hover { color: #6366f1; }
+
+    /* ── Hero ────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: #64748b;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero .cta {
+      display: inline-flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      padding: .75rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: .95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-secondary {
+      background: #fff;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* ── Features ────────────────────────────────── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .card .icon { font-size: 2rem; margin-bottom: .75rem; }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+    .card p { font-size: .875rem; color: #64748b; line-height: 1.6; }
+
+    /* ── Config panel ────────────────────────────── */
+    .config-panel {
+      position: fixed;
+      top: 70px;
+      left: 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.25rem;
+      width: 280px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      z-index: 200;
+      font-size: .85rem;
+    }
+    .config-panel h4 {
+      font-weight: 700;
+      margin-bottom: .75rem;
+      color: #475569;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .config-panel label {
+      display: block;
+      margin-bottom: .25rem;
+      color: #64748b;
+    }
+    .config-panel input {
+      width: 100%;
+      padding: .4rem .6rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: .8rem;
+      font-family: monospace;
+      margin-bottom: .75rem;
+      outline: none;
+    }
+    .config-panel input:focus { border-color: #6366f1; }
+    .config-panel button {
+      width: 100%;
+      padding: .5rem;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+    .config-panel button:hover { background: #4f46e5; }
+    .config-panel .status {
+      margin-top: .75rem;
+      padding: .4rem .6rem;
+      border-radius: 6px;
+      font-size: .8rem;
+      word-break: break-all;
+      display: none;
+    }
+    .config-panel .status.ok  { background:#d1fae5; color:#065f46; display:block; }
+    .config-panel .status.err { background:#fee2e2; color:#991b1b; display:block; }
+    .config-panel .hint {
+      margin-top: .6rem;
+      font-size: .75rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #94a3b8;
+      font-size: .85rem;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Acme Corp</span>
+  <div class="links">
+    <a href="#">Product</a>
+    <a href="#">Pricing</a>
+    <a href="#">Docs</a>
+    <a href="#">Blog</a>
+  </div>
+</nav>
+
+<div class="config-panel">
+  <h4>🔧 Widget Tester</h4>
+  <label>API Key</label>
+  <input id="api-key" type="text" placeholder="bot_…" spellcheck="false" />
+  <label>Widget URL</label>
+  <input id="widget-url" type="text" value="http://localhost:3002" />
+  <button onclick="loadWidget()">Load Widget</button>
+  <div id="status" class="status"></div>
+  <p class="hint">Find your API key in the dashboard under <strong>Embed Code</strong>.</p>
+</div>
+
+<section class="hero">
+  <h1>Build something amazing</h1>
+  <p>
+    This is a test page simulating a customer website with the Lidi AI
+    chat widget embedded. Paste your chatbot's API key in the panel on
+    the left and click <strong>Load Widget</strong>.
+  </p>
+  <div class="cta">
+    <a href="#" class="btn btn-primary">Get started</a>
+    <a href="#" class="btn btn-secondary">Learn more</a>
+  </div>
+</section>
+
+<div class="features">
+  <div class="card">
+    <div class="icon">⚡</div>
+    <h3>Lightning fast</h3>
+    <p>Optimised for speed. Your users won't wait a second longer than needed.</p>
+  </div>
+  <div class="card">
+    <div class="icon">🔒</div>
+    <h3>Secure by default</h3>
+    <p>The widget runs inside an iframe — fully isolated from your page.</p>
+  </div>
+  <div class="card">
+    <div class="icon">🎨</div>
+    <h3>Fully branded</h3>
+    <p>Match your brand with a custom theme color, name, and welcome message.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📱</div>
+    <h3>Mobile ready</h3>
+    <p>Full-screen on mobile, floating panel on desktop — no extra work.</p>
+  </div>
+</div>
+
+<footer>
+  This is a test page — not a real product. &nbsp;|&nbsp; Lidi AI Widget Tester
+</footer>
+
+<script>
+  const STORAGE_KEY = 'lidi_tester_api_key'
+  let currentScript = null
+
+  function setStatus(msg, ok) {
+    const el = document.getElementById('status')
+    el.textContent = msg
+    el.className = 'status ' + (ok ? 'ok' : 'err')
+  }
+
+  function removeWidget() {
+    const ids = ['lidi-widget-btn', 'lidi-widget-container', 'lidi-widget-style']
+    ids.forEach(id => document.getElementById(id)?.remove())
+    if (currentScript) { currentScript.remove(); currentScript = null }
+  }
+
+  function loadWidget() {
+    const apiKey   = document.getElementById('api-key').value.trim()
+    const widgetUrl = document.getElementById('widget-url').value.trim().replace(/\/$/, '')
+
+    if (!apiKey) {
+      setStatus('Paste your API key (bot_…) to load the widget.', false)
+      return
+    }
+
+    removeWidget()
+    localStorage.setItem(STORAGE_KEY, apiKey)
+
+    const script = document.createElement('script')
+    script.src = `${widgetUrl}/widget.js`
+    script.setAttribute('data-api-key', apiKey)
+    script.id = 'lidi-widget-script'
+
+    script.onload  = () => setStatus(`Loaded: ${apiKey}`, true)
+    script.onerror = () => setStatus(`Could not load widget.js from ${widgetUrl}`, false)
+
+    document.body.appendChild(script)
+    currentScript = script
+  }
+
+  // Pre-fill from last session and auto-load only if a key was saved
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      document.getElementById('api-key').value = saved
+      loadWidget()
+    }
+  })
+
+  // Load on Enter key inside either input
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.target.id === 'api-key' || e.target.id === 'widget-url')) {
+      loadWidget()
+    }
+  })
+</script>
+
+</body>
+</html>
