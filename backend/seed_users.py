@@ -84,6 +84,7 @@ async def seed() -> None:
                 password_hash=_hash(spec["password"]),
                 role=spec["role"],
                 is_admin=spec["is_admin"],
+                email_verified=True,
             )
             session.add(user)
             await session.flush()
