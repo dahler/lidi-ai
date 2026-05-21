@@ -8,7 +8,7 @@ interface ChatbotConfig {
   theme_color: string
 }
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function App() {
   // api_key comes from the URL: /chatbot/bot_abc123?host=https%3A%2F%2Fexample.com
