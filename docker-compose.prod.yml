@@ -32,6 +32,7 @@ services:
       context: ./frontend-dashboard
       args:
         VITE_API_URL: ""
+        VITE_WIDGET_URL: "https://chat.lidifoundation.org"
     container_name: lidi-dashboard
     restart: always
     depends_on:
