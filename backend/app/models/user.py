@@ -30,7 +30,8 @@ class User(Base):
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     google_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
     role: Mapped[UserRole] = mapped_column(
-        SAEnum(UserRole, name="userrole"), default=UserRole.CUSTOMER_ADMIN
+        SAEnum(UserRole, name="userrole", values_callable=lambda x: [e.value for e in x]),
+        default=UserRole.CUSTOMER_ADMIN,
     )
     organization_id: Mapped[int | None] = mapped_column(
         ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True
