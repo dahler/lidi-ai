@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { adminApi, Organization, User, Chatbot } from '../api/admin'
+import { adminApi, Organization, Chatbot } from '../api/admin'
 
 interface Stats {
   orgs: number
